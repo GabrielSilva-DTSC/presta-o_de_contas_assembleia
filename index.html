@@ -1,0 +1,319 @@
+<title>Contas da Assembleia Geral</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: prestação de contas em uma coluna única de leitura: cabeçalho, três totais, destino do dinheiro, arrecadação por dia, gastos com nota, doações por pessoa. */
+:root {
+  --plane: #f9f9f7;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #6f6d67;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --ring: rgba(11,11,11,0.10);
+  --doado: #2a78d6;
+  --gasto: #eb6834;
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --plane: #0d0d0d;
+    --surface: #1a1a19;
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --muted: #a09e97;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --ring: rgba(255,255,255,0.10);
+    --doado: #3987e5;
+    --gasto: #d95926;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --plane: #0d0d0d;
+  --surface: #1a1a19;
+  --ink: #f0efec;
+  --ink-2: #c3c2b7;
+  --muted: #a09e97;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --ring: rgba(255,255,255,0.10);
+  --doado: #3987e5;
+  --gasto: #d95926;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--plane);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-inline: 16px;
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 920px; margin-inline: auto; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, p { margin: 0; }
+h1 { font-size: clamp(1.6rem, 4.5vw, 2.2rem); line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-size: 1.05rem; font-weight: 600; text-wrap: balance; }
+.eyebrow { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.sub { color: var(--ink-2); max-width: 65ch; }
+
+header { display: flex; flex-direction: column; gap: 8px; padding-bottom: 4px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.85rem; color: var(--ink-2); }
+.meta span { display: inline-flex; gap: 6px; align-items: baseline; }
+.meta b { font-weight: 600; color: var(--ink); }
+
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.card-head { display: flex; flex-direction: column; gap: 2px; }
+.card-head p { font-size: 0.85rem; color: var(--ink-2); }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--ring); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.kpi .lab { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); font-weight: 600; }
+.dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.dot.doado { background: var(--doado); }
+.dot.gasto { background: var(--gasto); }
+.kpi .val { font-size: clamp(1.7rem, 5vw, 2.1rem); font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; }
+.kpi .note { font-size: 0.82rem; color: var(--ink-2); }
+
+.split { display: flex; gap: 2px; height: 22px; }
+.split i { display: block; height: 100%; min-width: 2px; }
+.split .g { background: var(--gasto); border-radius: 4px 0 0 4px; }
+.split .s { background: var(--doado); border-radius: 0 4px 4px 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 0.88rem; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend b { font-weight: 600; }
+
+.two { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; }
+@media (max-width: 760px) { .two { grid-template-columns: minmax(0, 1fr); } }
+
+.days { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; border-bottom: 1px solid var(--axis); }
+.day { display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; gap: 6px; height: 210px; cursor: default; border-radius: 4px; }
+.day .t { text-align: center; font-size: 0.85rem; font-weight: 600; line-height: 1.25; }
+.day .t small { display: block; font-weight: 400; color: var(--ink-2); font-size: 0.75rem; }
+.day .bar { background: var(--doado); border-radius: 4px 4px 0 0; min-height: 0; }
+.day .bar.zero { height: 0 !important; }
+.dlabels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; text-align: center; font-size: 0.8rem; color: var(--ink-2); margin-top: -8px; }
+
+.scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+th { text-align: left; font-size: 0.72rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 0 10px 8px 0; border-bottom: 1px solid var(--axis); white-space: nowrap; }
+td { padding: 10px 10px 10px 0; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th.r, td.r { text-align: right; padding-right: 0; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+td .sm { display: block; color: var(--ink-2); font-size: 0.78rem; }
+.mono { font-family: var(--font-mono); font-size: 0.78rem; white-space: nowrap; }
+tfoot td { border-bottom: 0; font-weight: 700; padding-top: 12px; }
+tr.hov:hover td, tr.hov:focus td { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+
+.tools { display: flex; gap: 6px; flex-wrap: wrap; }
+.tools button { font: inherit; font-size: 0.82rem; padding: 5px 12px; border-radius: 6px; border: 1px solid var(--ring); background: transparent; color: var(--ink-2); cursor: pointer; }
+.tools button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); font-weight: 600; }
+.tools button:focus-visible, .drow:focus-visible, .day:focus-visible, .seg:focus-visible { outline: 2px solid var(--doado); outline-offset: 2px; }
+
+.donors { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.drow { display: grid; grid-template-columns: minmax(5.5rem, 8rem) 3rem minmax(0, 1fr) 5.2rem; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--grid); border-radius: 4px; }
+.drow:hover { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.drow .dn { font-weight: 500; overflow-wrap: anywhere; }
+.drow .dd { color: var(--ink-2); font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+.drow .dbar { height: 12px; display: flex; align-items: center; }
+.drow .dbar i { display: block; height: 100%; background: var(--doado); border-radius: 0 4px 4px 0; min-width: 2px; }
+.drow .dv { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+
+.proof { background: var(--surface); border: 1px solid var(--ring); border-radius: 8px; padding: 14px 18px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; }
+.proof .txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 280px; }
+.proof .txt b { font-weight: 600; }
+.proof .txt span { font-size: 0.85rem; color: var(--ink-2); }
+.proof a { font-weight: 600; font-size: 0.9rem; color: var(--surface); background: var(--ink); text-decoration: none; padding: 9px 16px; border-radius: 6px; white-space: nowrap; }
+.proof a:hover { opacity: 0.88; }
+.proof a:focus-visible { outline: 2px solid var(--doado); outline-offset: 2px; }
+.notes { font-size: 0.82rem; color: var(--ink-2); display: flex; flex-direction: column; gap: 6px; max-width: 75ch; }
+
+#tip { position: fixed; z-index: 10; pointer-events: none; background: var(--ink); color: var(--surface); font-size: 0.8rem; line-height: 1.35; padding: 6px 10px; border-radius: 6px; max-width: 240px; opacity: 0; transition: opacity 0.1s; }
+#tip.on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { #tip { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Prestação de contas</div>
+    <h1>Arrecadação para a Assembleia Geral dos Estudantes da UFPB</h1>
+    <p class="sub">Quanto entrou, quanto foi gasto e quanto sobra, com a origem de cada valor.</p>
+    <div class="meta">
+      <span>Campanha <b>07/10/2026</b></span>
+      <span>Posição em <b>10/10/2026</b></span>
+      <span>Doadores identificados só pelo primeiro nome</span>
+    </div>
+  </header>
+
+  <section class="proof" aria-label="Comprovantes">
+    <div class="txt">
+      <b>Comprovantes</b>
+      <span>Notas fiscais, comprovante do reembolso e extrato bancário, na pasta do Drive.</span>
+    </div>
+    <a href="https://drive.google.com/drive/folders/1r_QeU6PmKjswP1yZcu4oo8eMp6K8rUHT?usp=drive_link" target="_blank" rel="noopener">Abrir pasta no Drive</a>
+  </section>
+
+  <section class="kpis" aria-label="Totais">
+    <div class="kpi"><div class="lab"><i class="dot doado"></i>Arrecadado</div><div class="val" id="k-in"></div><div class="note" id="k-in-n"></div></div>
+    <div class="kpi"><div class="lab"><i class="dot gasto"></i>Gasto</div><div class="val" id="k-out"></div><div class="note" id="k-out-n"></div></div>
+    <div class="kpi"><div class="lab">Saldo</div><div class="val" id="k-bal"></div><div class="note" id="k-bal-n"></div></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-dest">
+    <div class="card-head"><h2 id="h-dest">Destino do que foi arrecadado</h2><p>Parte já gasta e parte que continua disponível.</p></div>
+    <div class="split" id="split" role="img" aria-label="Proporção entre gasto e saldo"></div>
+    <div class="legend" id="split-leg"></div>
+  </section>
+
+  <div class="two">
+    <section class="card" aria-labelledby="h-dia">
+      <div class="card-head"><h2 id="h-dia">Doações por dia</h2><p>Valor recebido em cada dia do extrato.</p></div>
+      <div class="days" id="days"></div>
+      <div class="dlabels" id="dlabels"></div>
+    </section>
+
+    <section class="card" aria-labelledby="h-gastos">
+      <div class="card-head"><h2 id="h-gastos">Gastos com nota fiscal</h2><p>Compras de 09/10/2026, com o número da NFC-e. Feitas por Caio e Amanda, membros da organização, e depois reembolsadas.</p></div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Item</th><th>Nota</th><th>Pago</th><th class="r">Valor</th></tr></thead>
+          <tbody id="gastos"></tbody>
+          <tfoot><tr><td colspan="3">Total gasto</td><td class="r num" id="g-total"></td></tr></tfoot>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section class="card" aria-labelledby="h-doa">
+    <div class="card-head"><h2 id="h-doa">Doações recebidas</h2><p id="doa-sub"></p></div>
+    <div class="tools" role="group" aria-label="Ordenar doações">
+      <button type="button" id="o-data" aria-pressed="true">Por data</button>
+      <button type="button" id="o-valor" aria-pressed="false">Por valor</button>
+    </div>
+    <ul class="donors" id="donors"></ul>
+  </section>
+
+  <section class="notes">
+    <p><b>Fontes.</b> Extrato bancário da conta de arrecadação (07 a 09/10/2026) e notas fiscais eletrônicas (NFC-e) das quatro compras. Os documentos originais estão na pasta do Drive.</p>
+    <p><b>O que está fora.</b> Movimentações da conta anteriores a 07/10 não fazem parte da campanha. O extrato usado aqui não cobre o dia 10/10; o comprovante do reembolso está na pasta do Drive.</p>
+    <p><b>Nomes.</b> Primeiros nomes iguais correspondem a pessoas diferentes.</p>
+  </section>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+var DOACOES = [
+  {d:'07/10', n:'Grazielly', v:5.00}, {d:'07/10', n:'Sophia', v:5.00}, {d:'07/10', n:'Gabriela', v:13.00},
+  {d:'07/10', n:'Geiselane', v:15.00}, {d:'07/10', n:'Maria', v:10.00}, {d:'07/10', n:'Bruno', v:11.27},
+  {d:'07/10', n:'Alana', v:5.00}, {d:'07/10', n:'Henrique', v:5.00}, {d:'07/10', n:'Maria', v:50.00},
+  {d:'07/10', n:'Gleizielle', v:20.00}, {d:'07/10', n:'Hortencya', v:11.43}, {d:'07/10', n:'André', v:0.01},
+  {d:'08/10', n:'Maria', v:5.34}, {d:'08/10', n:'Luan', v:2.00}, {d:'08/10', n:'Vitória', v:5.00},
+  {d:'08/10', n:'Emilly', v:3.00}, {d:'08/10', n:'Everton', v:30.00}, {d:'08/10', n:'Euclides', v:30.00}
+];
+var GASTOS = [
+  {item:'Tinta de tecido fosca branca, 250 ml', loja:'Jussara Neves de Freitas Nazion', nota:'000049471', hora:'10:15', pg:'Cartão', v:32.00},
+  {item:'Tecido oxford vermelho, 7,5 m', loja:'Arte Malhas Ltda', nota:'000205261', hora:'10:04', pg:'Cartão', v:52.12},
+  {item:'Abraçadeira de nylon branca 4,8×300 mm, 100 un', loja:'Campelo Martins Com. de Material de Construção', nota:'000169145', hora:'15:00', pg:'PIX', v:45.00},
+  {item:'Fita Durex larga, 4 un', loja:'Junior Variedades', nota:'000014956', hora:'15:05', pg:'PIX', v:19.96}
+];
+
+var brl = new Intl.NumberFormat('pt-BR', {style:'currency', currency:'BRL'});
+var pct = function (x) { return Math.round(x * 100) + '%'; };
+var sum = function (a, f) { return Math.round(a.reduce(function (s, x) { return s + f(x); }, 0) * 100) / 100; };
+var $ = function (id) { return document.getElementById(id); };
+
+var totIn = sum(DOACOES, function (x) { return x.v; });
+var totOut = sum(GASTOS, function (x) { return x.v; });
+var saldo = Math.round((totIn - totOut) * 100) / 100;
+
+/* Totais */
+$('k-in').textContent = brl.format(totIn);
+$('k-in-n').textContent = DOACOES.length + ' doações em 07 e 08/10';
+$('k-out').textContent = brl.format(totOut);
+$('k-out-n').textContent = GASTOS.length + ' notas fiscais de 09/10';
+$('k-bal').textContent = brl.format(saldo);
+$('k-bal-n').textContent = 'Arrecadado menos gasto (' + pct(saldo / totIn) + ' do arrecadado)';
+
+/* Destino */
+var split = $('split');
+split.innerHTML = '<i class="g seg" tabindex="0" style="width:' + (totOut / totIn * 100) + '%" data-tip="Gasto: ' + brl.format(totOut) + ' (' + pct(totOut / totIn) + ')"></i>' +
+                  '<i class="s seg" tabindex="0" style="width:' + (saldo / totIn * 100) + '%" data-tip="Saldo: ' + brl.format(saldo) + ' (' + pct(saldo / totIn) + ')"></i>';
+$('split-leg').innerHTML =
+  '<span><i class="dot gasto"></i>Gasto <b>' + brl.format(totOut) + '</b> · ' + pct(totOut / totIn) + '</span>' +
+  '<span><i class="dot doado"></i>Saldo <b>' + brl.format(saldo) + '</b> · ' + pct(saldo / totIn) + '</span>';
+
+/* Doações por dia */
+var dias = [{d:'07/10'}, {d:'08/10'}, {d:'09/10'}].map(function (x) {
+  var l = DOACOES.filter(function (y) { return y.d === x.d; });
+  return {d: x.d, n: l.length, v: sum(l, function (y) { return y.v; })};
+});
+var maxDia = Math.max.apply(null, dias.map(function (x) { return x.v; }));
+var BAR_AREA = 130;
+$('days').innerHTML = dias.map(function (x) {
+  var h = x.v > 0 ? Math.max(2, x.v / maxDia * BAR_AREA) : 0;
+  return '<div class="day" tabindex="0" data-tip="' + x.d + '/2026: ' + brl.format(x.v) + ' em ' + x.n + (x.n === 1 ? ' doação' : ' doações') + '">' +
+    '<div class="t">' + brl.format(x.v) + '<small>' + x.n + (x.n === 1 ? ' doação' : ' doações') + '</small></div>' +
+    '<div class="bar' + (x.v === 0 ? ' zero' : '') + '" style="height:' + h + 'px"></div></div>';
+}).join('');
+$('dlabels').innerHTML = dias.map(function (x) { return '<span>' + x.d + '</span>'; }).join('');
+
+/* Gastos */
+$('gastos').innerHTML = GASTOS.map(function (g) {
+  return '<tr class="hov" tabindex="0" data-tip="' + g.loja + ' · NFC-e ' + g.nota + ' · 09/10/2026 às ' + g.hora + '">' +
+    '<td>' + g.item + '<span class="sm">' + g.loja + '</span></td>' +
+    '<td class="mono">' + g.nota + '</td>' +
+    '<td>' + g.pg + '</td>' +
+    '<td class="r num">' + brl.format(g.v) + '</td></tr>';
+}).join('');
+$('g-total').textContent = brl.format(totOut);
+
+/* Doadores */
+$('doa-sub').textContent = DOACOES.length + ' doações, total de ' + brl.format(totIn) + '. A barra compara cada valor com a maior doação.';
+var maxDoa = Math.max.apply(null, DOACOES.map(function (x) { return x.v; }));
+var ordem = 'data';
+function renderDoadores() {
+  var lista = DOACOES.map(function (x, i) { return {d: x.d, n: x.n, v: x.v, i: i}; });
+  if (ordem === 'valor') lista.sort(function (a, b) { return b.v - a.v || a.i - b.i; });
+  $('donors').innerHTML = lista.map(function (x) {
+    return '<li class="drow" tabindex="0" data-tip="' + x.n + ' doou ' + brl.format(x.v) + ' em ' + x.d + '/2026">' +
+      '<span class="dn">' + x.n + '</span><span class="dd">' + x.d + '</span>' +
+      '<span class="dbar"><i style="width:' + (x.v / maxDoa * 100) + '%"></i></span>' +
+      '<span class="dv">' + brl.format(x.v) + '</span></li>';
+  }).join('');
+  $('o-data').setAttribute('aria-pressed', ordem === 'data');
+  $('o-valor').setAttribute('aria-pressed', ordem === 'valor');
+}
+$('o-data').onclick = function () { ordem = 'data'; renderDoadores(); };
+$('o-valor').onclick = function () { ordem = 'valor'; renderDoadores(); };
+renderDoadores();
+
+/* Tooltip */
+var tip = $('tip');
+function place(x, y) {
+  var w = tip.offsetWidth, h = tip.offsetHeight;
+  var left = Math.min(Math.max(8, x + 12), window.innerWidth - w - 8);
+  var top = y - h - 12 < 8 ? y + 16 : y - h - 12;
+  tip.style.left = left + 'px'; tip.style.top = top + 'px';
+}
+function show(el, x, y) {
+  var t = el.getAttribute('data-tip');
+  if (!t) return;
+  tip.textContent = t; tip.classList.add('on'); place(x, y);
+}
+function hide() { tip.classList.remove('on'); }
+document.addEventListener('mouseover', function (e) { var el = e.target.closest('[data-tip]'); if (el) show(el, e.clientX, e.clientY); });
+document.addEventListener('mousemove', function (e) { if (tip.classList.contains('on')) place(e.clientX, e.clientY); });
+document.addEventListener('mouseout', function (e) { if (e.target.closest('[data-tip]')) hide(); });
+document.addEventListener('focusin', function (e) {
+  var el = e.target.closest('[data-tip]');
+  if (el) { var r = el.getBoundingClientRect(); show(el, r.left + r.width / 2, r.top); }
+});
+document.addEventListener('focusout', hide);
+</script>
